@@ -146,6 +146,7 @@ Examples:
 
 Start options:
   --site <url|domain>           (required; adds https:// when missing)
+  --task <text>                 (optional; high-level goal for the assistant)
   --profile <name>              (optional; explicit Kernel profile name to find/create)
   --resourceId <id>             (default: demo-user)
   --threadId <id>               (default: <resourceId>-profile)
@@ -458,6 +459,7 @@ async function runInteractiveWebTaskLoop(args: {
   resourceId: string;
   agentThreadId: string;
   profileThreadId: string;
+  task: string;
   maxTurns: number;
   startUrl: string;
   introLabel: string;
@@ -469,10 +471,11 @@ async function runInteractiveWebTaskLoop(args: {
   const webTaskAgent = buildInteractiveWebTaskAgent(args.sessionId, model, args.startUrl);
   const rl = createInterface({ input, output });
   process.stdout.write(`${args.introLabel}\n`);
+  process.stdout.write(`Task: ${args.task}\n`);
 
   const conversation: Array<{ role: "user" | "agent"; text: string }> = [];
   let rememberedProfile = await readProfileFields(args.resourceId, args.profileThreadId).catch(() => ({}));
-  let latestUserMessage = `Start interactive web task flow for URL: ${args.startUrl}. Inspect first and ask only for missing values.`;
+  let latestUserMessage = `Start interactive web task flow for URL: ${args.startUrl}. Task: ${args.task}. Inspect first and ask only for missing values.`;
   try {
     for (let turn = 0; turn < args.maxTurns; turn += 1) {
       const preTurnSnapshot = await extractLoginFormFields(args.sessionId, args.startUrl).catch(() => undefined);
@@ -493,7 +496,10 @@ async function runInteractiveWebTaskLoop(args: {
               .join("\n")
           : "(none)";
       const rememberedProfileText = formatRememberedFields(rememberedProfile);
-      const turnPrompt = `${snapshotContext}
+      const turnPrompt = `Task goal:
+${args.task}
+
+${snapshotContext}
 Remembered non-sensitive profile fields:
 ${rememberedProfileText}
 
@@ -509,7 +515,10 @@ You can reuse remembered profile values when relevant for visible form fields.`;
       const result = await runAgentTurnWithTrace({
         agent: webTaskAgent,
         prompt: turnPrompt,
-        system: `${snapshotContext}
+        system: `Task goal:
+${args.task}
+
+${snapshotContext}
 Remembered profile fields:
 ${rememberedProfileText}
 Always ground your answer in this snapshot and tools. If snapshot url is about:blank, call inspectPageFormTool with "${args.startUrl}" first.`,
@@ -578,6 +587,7 @@ async function runHitlWebTaskFlow(args: {
   resourceId: string;
   profileThreadId: string;
   agentThreadId: string;
+  task: string;
   maxTurns: number;
   debug: boolean;
   trace: boolean;
@@ -595,6 +605,7 @@ async function runHitlWebTaskFlow(args: {
       resourceId: args.resourceId,
       profileThreadId: args.profileThreadId,
       agentThreadId: args.agentThreadId,
+      task: args.task,
       maxTurns: args.maxTurns,
       startUrl: args.siteUrl,
       introLabel: "HITL web task flow started.",
@@ -621,6 +632,9 @@ async function runStart(args: ArgMap): Promise<void> {
 
   const resourceId = argString(args, "resourceId", "demo-user") ?? "demo-user";
   const profileThreadId = argString(args, "threadId", `${resourceId}-profile`) ?? `${resourceId}-profile`;
+  const task =
+    argString(args, "task")?.trim() ??
+    "Log in if needed, then complete the requested web task using the page controls. Ask me only for missing information.";
   const profile = argString(args, "profile");
   const profileName = profile?.trim() ? profile.trim() : undefined;
   const turnsRaw = Number(argString(args, "turns", "6") ?? "6");
@@ -634,6 +648,7 @@ async function runStart(args: ArgMap): Promise<void> {
     resourceId,
     profileThreadId,
     agentThreadId,
+    task,
     maxTurns,
     debug,
     trace,
@@ -643,6 +658,7 @@ async function runStart(args: ArgMap): Promise<void> {
     mode: "hitl_web_task",
     status: runResult.completed ? "completed" : "interrupted",
     site: siteUrl,
+    task,
     profile: profileName,
     resourceId,
     threadId: profileThreadId,
