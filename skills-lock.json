@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "skills": {
+    "kernel-agent-browser": {
+      "source": "kernel/skills",
+      "sourceType": "github",
+      "computedHash": "e7fa13b3331541b1e778fe85f551c92d108d48f5ce70688e0a40111fe7191598"
+    },
+    "kernel-auth": {
+      "source": "kernel/skills",
+      "sourceType": "github",
+      "computedHash": "985abde612c4904f8745ca2a70e4ad478f6db402c5880ce8ba4ddf918059aa9c"
+    },
+    "kernel-cli": {
+      "source": "kernel/skills",
+      "sourceType": "github",
+      "computedHash": "51abda1d77efdab5737e072046b04a4622131ef851d772d39af3e5d0f630ee44"
+    },
+    "kernel-python-sdk": {
+      "source": "kernel/skills",
+      "sourceType": "github",
+      "computedHash": "c72895de830efd1d6732c6a069f9b4da7073985736c224a17ee7caf6f5e41980"
+    },
+    "kernel-typescript-sdk": {
+      "source": "kernel/skills",
+      "sourceType": "github",
+      "computedHash": "7e3d3ca82e68b93059a61f87846ee08278f96689e3b99b600d4f92faf3d91ec8"
+    },
+    "mastra": {
+      "source": "mastra-ai/skills",
+      "sourceType": "github",
+      "computedHash": "e252375a8efb764c7015eabe5deae8d387422a167da47eb20f326ccb7d697eb0"
+    },
+    "profile-website-bot-detection": {
+      "source": "kernel/skills",
+      "sourceType": "github",
+      "computedHash": "8938c71df134feabb7746ed4e5c04811e6669994e85c51e725baeefd0a5070bf"
+    }
+  }
+}
